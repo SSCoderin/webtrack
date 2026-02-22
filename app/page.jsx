@@ -104,8 +104,8 @@ export default function App() {
                 </div>
 
                 <SignOutButton>
-                  <button className="text-zinc-500 hover:text-white transition-colors">
-                    <LogOut className="w-4 h-4" />
+                  <button className=" transition-colors flex items-center gap-2 hover:text-red-500 cursor-pointer text-red-400">
+                    logout <LogOut className="w-4 h-4" />
                   </button>
                 </SignOutButton>
               </div>
