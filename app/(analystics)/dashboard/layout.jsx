@@ -1,13 +1,15 @@
+import DashboardProvider from "./provider"
 export default function Layout({ children }) {
+
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-300 font-sans selection:bg-emerald-500/30 overflow-x-hidden">
-      
+
       {/* Subtle Grid Background */}
       <div className="fixed inset-0 bg-[linear-gradient(to_right,#18181b_1px,transparent_1px),linear-gradient(to_bottom,#18181b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none z-0" />
-
-      {/* Content Layer */}
       <div className="relative z-10">
-        {children}
+        <DashboardProvider>
+          {children}
+        </DashboardProvider>
       </div>
 
       {/* Global Animations for the Background/Hero */}
