@@ -29,6 +29,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
+        <script
+  defer
+  data-website-id="878bb4d39a6a27083cb9efef"
+  data-domain="http://localhost:3000"
+  src="http://localhost:3000/analytic.js"
+></script>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Provider>
           {children}

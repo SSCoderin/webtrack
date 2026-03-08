@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { eq, and, or, ilike } from "drizzle-orm";
+
 import { db } from "@/configs/db";
 import { websiteTable } from "@/configs/schema";
 import { currentUser } from "@clerk/nextjs/server";
@@ -23,8 +24,8 @@ export async function POST(req: NextRequest) {
       domain,
       timeZone,
       enableLocahostTracking,
-      userEmail,
     } = body;
+    const userEmail = user.primaryEmailAddress?.emailAddress;
 
     // 2️⃣ Basic Validation
     if (!domain || !timeZone || !userEmail) {
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
     }
 
     const domainRegex =
-      /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+      /^(?:(?!:\/\/)(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|localhost(?::\d+)?)$/;
 
     if (!domainRegex.test(domain)) {
       return NextResponse.json(
@@ -100,20 +101,113 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const clerkUser = await currentUser();
+
+  if (!clerkUser || !clerkUser.primaryEmailAddress?.emailAddress) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const email = clerkUser.primaryEmailAddress.emailAddress;
+
   try {
-    const websites = await db
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get("search");
+
+    let query = db
       .select()
-      .from(websiteTable);
+      .from(websiteTable)
+      .where(eq(websiteTable.userEmail, email));
+
+    // If search exists → filter by domain OR timezone
+    if (search) {
+      query = db
+        .select()
+        .from(websiteTable)
+        .where(
+          and(
+            eq(websiteTable.userEmail, email),
+            or(
+              ilike(websiteTable.domain, `%${search}%`),
+              ilike(websiteTable.timeZone, `%${search}%`)
+            )
+          )
+        );
+    }
+
+    const websites = await query;
 
     return NextResponse.json(
-      {
-        data: websites,
-      },
+      { data: websites },
       { status: 200 }
     );
 
   } catch (error) {
-    console.error("GET /api/websites error:", error);
+    console.error("GET /api/website error:", error);
+
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    // 1️⃣ Get logged-in user
+    const clerkUser = await currentUser();
+
+    if (!clerkUser || !clerkUser.primaryEmailAddress?.emailAddress) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const email = clerkUser.primaryEmailAddress.emailAddress;
+
+    // 2️⃣ Get websiteId from query params
+    const { searchParams } = new URL(req.url);
+    const websiteId = searchParams.get("websiteId");
+
+    if (!websiteId) {
+      return NextResponse.json(
+        { error: "websiteId is required" },
+        { status: 400 }
+      );
+    }
+
+    // 3️⃣ Check if website exists and belongs to user
+    const existing = await db
+      .select()
+      .from(websiteTable)
+      .where(eq(websiteTable.websiteId, websiteId));
+
+    if (existing.length === 0) {
+      return NextResponse.json(
+        { error: "Website not found" },
+        { status: 404 }
+      );
+    }
+
+    if (existing[0].userEmail !== email) {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
+    }
+
+    // 4️⃣ Delete website
+    await db
+      .delete(websiteTable)
+      .where(eq(websiteTable.websiteId, websiteId));
+
+    return NextResponse.json(
+      { message: "Website deleted successfully" },
+      { status: 200 }
+    );
+
+  } catch (error) {
+    console.error("DELETE /api/websites error:", error);
 
     return NextResponse.json(
       { error: "Internal Server Error" },

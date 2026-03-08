@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Mail, Clock } from "lucide-react";
+import { Globe, Mail, Clock ,ArrowLeft} from "lucide-react";
 import { timeZones } from "@/app/lib/timezone";
 import axios from "axios";
+import ScriptPopup from "@/app/(analystics)/Components/DisplayScript";
+import Link from "next/link";
 
 export default function AddWebsite() {
 
@@ -14,13 +16,11 @@ export default function AddWebsite() {
         domain: "",
         timeZone: defaultTZ,
         enableLocahostTracking: false,
-        userEmail: ""
     });
 
     const [errors, setErrors] = useState({
         domain: "",
         timeZone: "",
-        userEmail: ""
     });
 
     const formatTimeZone = (tz) => {
@@ -28,20 +28,13 @@ export default function AddWebsite() {
     };
 
     const validate = () => {
-        const newErrors  = {};
+        const newErrors = {};
 
         const domainRegex =
-            /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+            /^(?:(?!:\/\/)(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|localhost(?::\d+)?)$/;
 
         if (!domainRegex.test(form.domain)) {
-            newErrors.domain = "Enter a valid domain (example.com)";
-        }
-
-        const emailRegex =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(form.userEmail)) {
-            newErrors.userEmail = "Enter a valid email address";
+            newErrors.domain = "Enter a valid domain (example.com or localhost:3000)";
         }
 
         if (!form.timeZone) {
@@ -51,31 +44,46 @@ export default function AddWebsite() {
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-const [loading, setLoading] = useState(false);
-const [error_reponsemsg, setError_reponsemsg] = useState("")
-const [sucess_reponse, setSucess_reponse] = useState("")
+    const [loading, setLoading] = useState(false);
+    const [error_reponsemsg, setError_reponsemsg] = useState("")
+    const [sucess_reponse, setSucess_reponse] = useState("")
+    const [createdWebsite, setCreatedWebsite] = useState(null);
+    const [showScriptModal, setShowScriptModal] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!validate()) return;
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
+        try {
+            setLoading(true);
+            setError_reponsemsg("");
 
-    try {
-        setLoading(true);
+            const response = await axios.post("/api/website", form);
 
-        const response = await axios.post("/api/website", form);
-        setSucess_reponse(response.data.message);
+            setSucess_reponse(response.data.message);
+            setCreatedWebsite(response.data.data);
+            setShowScriptModal(true);
 
-        console.log(response.data);
+            // ✅ Disable button after success
+            setIsRegistered(true);
 
-    } catch (error) {
-        console.error(error.response?.data?.error);
-        setError_reponsemsg(error.response?.data?.error)
-    } finally {
-        setLoading(false);
-    }
-};
+        } catch (error) {
+            setError_reponsemsg(error.response?.data?.error);
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
-        <div className="min-h-screen text-zinc-300 p-6 pt-32">
+        <div className="min-h-screen text-zinc-300 p-6 pt-32 max-w-6xl mx-auto">
+
+            <Link
+                href="/dashboard"
+                className="group inline-flex items-center gap-2 text-white hover:text-green-400 transition-colors mb-8"
+            >
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                Back to Dashboard
+            </Link>
+
             <div className="max-w-2xl mx-auto">
 
                 <div className="mb-8 border-b border-zinc-800 pb-6">
@@ -151,30 +159,6 @@ const handleSubmit = async (e) => {
                             )}
                         </div>
 
-                        {/* Email */}
-                        <div>
-                            <label className="text-xs uppercase tracking-widest text-zinc-500">
-                                Contact Email
-                            </label>
-                            <div className="mt-2 flex items-center gap-3 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 focus-within:border-emerald-500 transition-colors">
-                                <Mail size={16} className="text-zinc-500" />
-                                <input
-                                    type="email"
-                                    placeholder="you@example.com"
-                                    className="bg-transparent outline-none w-full text-sm text-white"
-                                    value={form.userEmail}
-                                    onChange={(e) =>
-                                        setForm({ ...form, userEmail: e.target.value })
-                                    }
-                                />
-                            </div>
-                            {errors.userEmail && (
-                                <p className="text-red-500 text-xs mt-2">
-                                    {errors.userEmail}
-                                </p>
-                            )}
-                        </div>
-
                         {/* Localhost toggle */}
                         <div className="flex items-center justify-between bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3">
                             <div>
@@ -219,6 +203,12 @@ const handleSubmit = async (e) => {
                                 </p>
                             )
                         }
+                        {showScriptModal && createdWebsite && (
+                            <ScriptPopup
+                                website={createdWebsite}
+                                onClose={() => setShowScriptModal(false)}
+                            />
+                        )}
                     </form>
                 </div>
             </div>
