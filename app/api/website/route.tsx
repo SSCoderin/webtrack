@@ -35,16 +35,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const domainRegex =
-      /^(?:(?!:\/\/)(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|localhost(?::\d+)?)$/;
+    let cleanDomain = domain
+      .replace(/^https?:\/\//, "") // remove http:// or https://
+      .replace(/\/$/, ""); // remove trailing slash
 
-    if (!domainRegex.test(domain)) {
+    const domainRegex =
+      /^(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$|^localhost(?::\d+)?$/;
+
+    if (!domainRegex.test(cleanDomain)) {
       return NextResponse.json(
         { error: "Invalid domain format" },
         { status: 400 }
       );
     }
-
     const emailRegex =
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

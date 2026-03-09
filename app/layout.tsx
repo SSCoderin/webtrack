@@ -1,11 +1,10 @@
 import type { Metadata } from 'next'
-import {
-  ClerkProvider,
-} from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
-import Header from './(analystics)/Components/Header'
 import { Provider } from './provider'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -23,22 +22,25 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <ClerkProvider>
       <html lang="en">
-        <script
-  defer
-  data-website-id="878bb4d39a6a27083cb9efef"
-  data-domain="http://localhost:3000"
-  src="http://localhost:3000/analytic.js"
-></script>
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Provider>
-          {children}
-        </Provider>
+          
+          <Script
+            src="http://localhost:3000/analytic.js"
+            strategy="afterInteractive"
+            data-website-id="878bb4d39a6a27083cb9efef"
+            data-domain="http://localhost:3000"
+          />
+
+          <Provider>
+            {children}
+          </Provider>
+
         </body>
       </html>
     </ClerkProvider>

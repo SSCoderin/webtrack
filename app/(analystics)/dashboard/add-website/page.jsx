@@ -30,8 +30,8 @@ export default function AddWebsite() {
     const validate = () => {
         const newErrors = {};
 
-        const domainRegex =
-            /^(?:(?!:\/\/)(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|localhost(?::\d+)?)$/;
+       const domainRegex =
+        /^(https?:\/\/)?((?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}|localhost)(:\d+)?$/;
 
         if (!domainRegex.test(form.domain)) {
             newErrors.domain = "Enter a valid domain (example.com or localhost:3000)";
@@ -185,6 +185,7 @@ export default function AddWebsite() {
                         {/* Submit */}
                         <button
                             type="submit"
+                            disabled={loading || isRegistered}
                             className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-widest rounded transition-all active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
                         >
                             {loading ? "Registering..." : "Register Website"}

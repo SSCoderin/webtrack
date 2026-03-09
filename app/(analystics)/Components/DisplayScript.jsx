@@ -26,9 +26,6 @@ export default function ScriptPopup({ website, onClose }) {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl p-8 shadow-2xl relative">
 
-                <h2 className="text-white text-lg font-bold mb-4">
-                    🎉 Website Created Successfully
-                </h2>
 
                 <p className="text-zinc-400 text-sm mb-6">
                     Add this tracking script inside your website's {"<head>"} tag.

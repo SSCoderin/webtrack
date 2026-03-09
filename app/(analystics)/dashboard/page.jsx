@@ -125,7 +125,7 @@ export default function Dashboard() {
 
                                                 <div className="flex items-center gap-3">
                                                     <a
-                                                        href={site.domain.startsWith('localhost') ? `http://${site.domain}` : `https://${site.domain}`}
+                                                        href={site.domain.startsWith('localhost') ? `${site.domain}` : `${site.domain}`}
                                                         target="_blank"
                                                         className="text-zinc-600 hover:text-white transition-colors"
                                                     >

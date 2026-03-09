@@ -38,7 +38,7 @@ export default function App() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
+  const trafficValues = [62, 48, 35, 57];
   const features = [
     {
       title: "Live Analytics",
@@ -145,7 +145,7 @@ export default function App() {
                   router.push("/sign-in");
                 }
               }}
-              className="px-8 py-3 rounded bg-emerald-500 text-black font-bold text-xs uppercase tracking-widest hover:bg-emerald-400 transition-all"
+              className="px-8 py-3 cursor-pointer rounded bg-emerald-500 text-black font-bold text-xs uppercase tracking-widest hover:bg-emerald-400 transition-all"
             >
               Get Started
             </button>
@@ -242,7 +242,10 @@ export default function App() {
                       <div key={i} className="space-y-2">
                         <p className="text-[10px] font-bold text-zinc-600 uppercase">{src}</p>
                         <div className="h-1 bg-zinc-900 rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500" style={{ width: `${Math.random() * 60 + 20}%` }} />
+                          <div
+                            className="h-full bg-emerald-500"
+                            style={{ width: `${trafficValues[i]}%` }}
+                          />
                         </div>
                       </div>
                     ))}

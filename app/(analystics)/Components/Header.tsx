@@ -1,10 +1,11 @@
 "use client"
+import { useRouter } from "next/navigation";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { Globe } from "lucide-react";
 
 export default function Header() {
     const { user } = useUser();
-    
+    const router = useRouter();
     return (
         <header className="fixed top-0 left-0 right-0 z-50 flex justify-center p-4">
             {/* The Floating Card Container */}
@@ -13,7 +14,11 @@ export default function Header() {
                             rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
                 
                 {/* Logo Section */}
-                <div className="flex items-center gap-3 group cursor-pointer">
+                <div
+                onClick={()=>{
+                     router.push("/")
+                }} 
+                className="flex items-center gap-3 group cursor-pointer ">
                     <div className="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                         <Globe className="text-black w-4 h-4 stroke-[2.5]" />
                     </div>
