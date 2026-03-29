@@ -48,6 +48,12 @@ export const pageViewTable = pgTable("pageViews", {
   country: varchar({ length: 100 }),
 
   ipAddress: varchar({ length: 100 }),
+  countryCode : varchar({ length: 100 }),
+  latitude: varchar({ length: 100 }),
+  longitude: varchar({ length: 100 }),
+
+    
+
 
   refParams: text(),
 });
